@@ -1,0 +1,539 @@
+
+<style>
+  .wrap { padding: 1rem 0; font-family: var(--font-sans); }
+  .filter-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1.5rem; }
+  .filter-btn { padding: 6px 14px; border: 0.5px solid var(--color-border-secondary); border-radius: 20px; background: var(--color-background-primary); color: var(--color-text-secondary); font-size: 13px; cursor: pointer; }
+  .filter-btn.active { background: var(--color-text-primary); color: var(--color-background-primary); border-color: var(--color-text-primary); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; }
+  .card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; cursor: pointer; transition: border-color .15s; }
+  .card:hover { border-color: var(--color-border-primary); }
+  .card.expanded { border-color: var(--color-border-primary); }
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .card-num { font-size: 11px; font-weight: 500; color: var(--color-text-tertiary); min-width: 24px; }
+  .card-title { font-size: 14px; font-weight: 500; color: var(--color-text-primary); flex: 1; }
+  .card-cat { font-size: 11px; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+  .card-chevron { font-size: 12px; color: var(--color-text-tertiary); flex-shrink: 0; }
+  .card-tagline { font-size: 13px; color: var(--color-text-secondary); margin-top: 4px; line-height: 1.5; }
+  .card-detail { display: none; margin-top: 12px; border-top: 0.5px solid var(--color-border-tertiary); padding-top: 12px; }
+  .card.expanded .card-detail { display: block; }
+  .section-label { font-size: 11px; font-weight: 500; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; margin-top: 10px; }
+  .section-label:first-child { margin-top: 0; }
+  .fields { display: flex; flex-wrap: wrap; gap: 5px; }
+  .field { font-size: 12px; background: var(--color-background-secondary); color: var(--color-text-secondary); padding: 3px 9px; border-radius: 4px; }
+  .field.key { background: var(--color-background-info); color: var(--color-text-info); }
+  .note { font-size: 12px; color: var(--color-text-secondary); line-height: 1.6; margin-top: 8px; border-left: 2px solid var(--color-border-secondary); padding-left: 10px; }
+  .hidden { display: none; }
+</style>
+
+<div class="wrap">
+  <div class="filter-bar" id="filters"></div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<script>
+const templates = [
+  {
+    id: 1, cat: "Tech", color: "blue",
+    title: "Software Engineer",
+    tagline: "Full-stack, backend or frontend developers in product companies",
+    contact: ["Full Name", "Phone", "Email", "LinkedIn", "GitHub", "Portfolio URL", "City / Country"],
+    summary: ["2–3 line technical summary", "Years of experience", "Core specialization (frontend/backend/fullstack)", "Key technologies"],
+    sections: [
+      { name: "Technical Skills", fields: ["Programming Languages", "Frameworks & Libraries", "Databases", "Cloud Platforms", "DevOps Tools", "Testing Tools"] },
+      { name: "Work Experience", fields: ["Job Title", "Company", "Location", "Dates", "Bullet points (use metrics: reduced load time by 40%)", "Tech stack used per role"] },
+      { name: "Projects", fields: ["Project name", "Description (1–2 lines)", "Tech stack", "GitHub link / Live URL", "Your specific contribution"] },
+      { name: "Education", fields: ["Degree", "University", "Graduation year", "Relevant coursework (optional)"] },
+      { name: "Certifications", fields: ["AWS / GCP / Azure", "Other relevant certs"] },
+    ],
+    uaeNote: "Include visa status. UAE tech sector heavily values cloud and mobile skills."
+  },
+  {
+    id: 2, cat: "Tech", color: "blue",
+    title: "Data Scientist / ML Engineer",
+    tagline: "AI, analytics and machine learning professionals",
+    contact: ["Full Name", "Phone", "Email", "LinkedIn", "GitHub / Kaggle", "Google Scholar (if applicable)", "City"],
+    summary: ["Domain specialization (NLP, CV, forecasting etc)", "Years of experience", "Notable model performance or business impact"],
+    sections: [
+      { name: "Technical Skills", fields: ["Languages (Python, R, SQL)", "ML Frameworks (PyTorch, TensorFlow, scikit-learn)", "Data tools (Spark, dbt, Airflow)", "Cloud ML platforms", "Visualization tools"] },
+      { name: "Work Experience", fields: ["Role", "Company", "Dates", "Models built and deployed", "Business outcomes achieved", "Data scale handled"] },
+      { name: "Projects / Research", fields: ["Project title", "Problem statement", "Approach & models used", "Metrics (accuracy, F1, RMSE)", "Link to paper / repo"] },
+      { name: "Education", fields: ["Degree (MSc/PhD preferred)", "Thesis title if relevant"] },
+      { name: "Publications / Talks", fields: ["Paper title", "Conference / journal", "Year"] },
+    ],
+    uaeNote: "Mention UAE / GCC domain experience (fintech, oil & gas, retail) if applicable."
+  },
+  {
+    id: 3, cat: "Tech", color: "blue",
+    title: "UI / UX Designer",
+    tagline: "Product designers, interaction designers and UX researchers",
+    contact: ["Full Name", "Email", "Phone", "Portfolio URL (mandatory)", "LinkedIn", "Behance / Dribbble", "City"],
+    summary: ["Design philosophy in 2 sentences", "Key domains (mobile, web, enterprise)", "Tools mastered"],
+    sections: [
+      { name: "Core Skills", fields: ["Figma", "Adobe XD / Sketch", "Prototyping", "User Research", "Usability Testing", "Design Systems", "Accessibility (WCAG)"] },
+      { name: "Work Experience", fields: ["Role", "Company", "Dates", "Projects worked on", "Design process used", "User metrics improved (conversion, task completion)"] },
+      { name: "Portfolio Highlights", fields: ["Project name", "Problem solved", "Design approach", "Outcome / metrics", "Link to case study"] },
+      { name: "Education", fields: ["Degree / Diploma", "Institution"] },
+      { name: "Tools & Software", fields: ["Design tools", "Research tools", "Handoff tools (Zeplin, Storybook)"] },
+    ],
+    uaeNote: "Portfolio link is non-negotiable for UAE design roles. Include Arabic RTL design experience if any."
+  },
+  {
+    id: 4, cat: "Tech", color: "blue",
+    title: "DevOps / Cloud Engineer",
+    tagline: "Infrastructure, CI/CD and platform engineers",
+    contact: ["Full Name", "Phone", "Email", "LinkedIn", "GitHub", "City"],
+    summary: ["Cloud platforms specialization", "Key focus: reliability, automation, security", "Scale of systems managed"],
+    sections: [
+      { name: "Technical Skills", fields: ["Cloud (AWS / GCP / Azure)", "IaC (Terraform, Ansible, Pulumi)", "Containers (Docker, Kubernetes)", "CI/CD (Jenkins, GitHub Actions, GitLab)", "Monitoring (Prometheus, Grafana, Datadog)", "Scripting (Bash, Python)"] },
+      { name: "Work Experience", fields: ["Role", "Company", "Dates", "Infrastructure managed", "Uptime / SLA improvements", "Cost savings achieved", "Pipelines built"] },
+      { name: "Certifications", fields: ["AWS Solutions Architect", "CKA / CKAD", "GCP Professional", "Azure Administrator"] },
+      { name: "Projects", fields: ["Infrastructure project", "Tools used", "Business impact"] },
+      { name: "Education", fields: ["Degree", "University"] },
+    ],
+    uaeNote: "Azure and AWS certs are highly valued in UAE enterprise and government sectors."
+  },
+  {
+    id: 5, cat: "Tech", color: "blue",
+    title: "Cybersecurity Analyst",
+    tagline: "SOC analysts, pen testers and security engineers",
+    contact: ["Full Name", "Phone", "Email", "LinkedIn", "City", "Security Clearance Level (if applicable)"],
+    summary: ["Security domain (offensive / defensive / GRC)", "Key tools and frameworks", "Industries secured"],
+    sections: [
+      { name: "Technical Skills", fields: ["SIEM tools (Splunk, QRadar)", "Pen testing (Kali, Metasploit, Burp Suite)", "Network security", "Cloud security", "Incident response", "Compliance (ISO 27001, NIST, GDPR)"] },
+      { name: "Work Experience", fields: ["Role", "Company", "Dates", "Incidents handled", "Vulnerabilities found / fixed", "Compliance frameworks implemented"] },
+      { name: "Certifications", fields: ["CEH", "CISSP", "CompTIA Security+", "OSCP", "CISM"] },
+      { name: "Education", fields: ["Degree", "University"] },
+      { name: "CTF / Projects", fields: ["Competition name", "Rank", "Skills demonstrated"] },
+    ],
+    uaeNote: "UAE has strict cybersecurity licensing (TDRA). Mention any UAE-specific compliance knowledge."
+  },
+  {
+    id: 6, cat: "Finance", color: "teal",
+    title: "Financial Analyst",
+    tagline: "Corporate finance, FP&A and investment analysts",
+    contact: ["Full Name", "Phone", "Email", "LinkedIn", "City / Visa Status"],
+    summary: ["Finance specialty (FP&A, valuation, M&A)", "Years of experience", "Industries covered", "Tools expertise"],
+    sections: [
+      { name: "Core Skills", fields: ["Financial Modeling", "Valuation (DCF, Comps)", "Excel / Power BI", "Bloomberg / FactSet", "SQL", "Python / VBA (if applicable)"] },
+      { name: "Work Experience", fields: ["Job Title", "Company", "Dates", "Models built", "Deal sizes worked on", "Revenue / cost impact of analysis", "Stakeholders presented to"] },
+      { name: "Education", fields: ["Degree (Finance, Economics, Accounting)", "University", "GPA if strong"] },
+      { name: "Certifications", fields: ["CFA Level I/II/III", "CPA", "ACCA", "FRM", "CFP"] },
+      { name: "Key Achievements", fields: ["Cost saved", "Revenue influenced", "Portfolio size managed"] },
+    ],
+    uaeNote: "ACCA and CFA are highly respected in UAE finance. Mention if you have GCC or MENA market experience."
+  },
+  {
+    id: 7, cat: "Finance", color: "teal",
+    title: "Accountant / Auditor",
+    tagline: "General accountants, management accountants and audit professionals",
+    contact: ["Full Name", "Phone", "Email", "LinkedIn", "City", "Visa Status"],
+    summary: ["Accounting specialization", "Years of experience", "Software proficiency"],
+    sections: [
+      { name: "Core Skills", fields: ["IFRS / GAAP", "VAT / Tax (UAE)", "ERP systems (SAP, Oracle, QuickBooks)", "Financial statements", "Audit methodology", "Excel / Tally"] },
+      { name: "Work Experience", fields: ["Role", "Company", "Dates", "Accounts managed", "Audit scope", "Errors found / compliance achieved", "Team size managed"] },
+      { name: "Education", fields: ["Degree (Accounting, Finance)", "University"] },
+      { name: "Certifications", fields: ["CA / ACA", "ACCA", "CPA", "CMA", "VAT Registration Certificate (UAE)"] },
+    ],
+    uaeNote: "UAE VAT knowledge (introduced 2018) is mandatory. Mention ADNOC / government audit experience if relevant."
+  },
+  {
+    id: 8, cat: "Finance", color: "teal",
+    title: "Investment Banker",
+    tagline: "M&A, capital markets and advisory professionals",
+    contact: ["Full Name", "Phone", "Email", "LinkedIn", "City"],
+    summary: ["Deal type specialty (M&A, ECM, DCM)", "Transaction experience", "Sector focus"],
+    sections: [
+      { name: "Core Skills", fields: ["Financial Modeling (LBO, DCF, merger model)", "Pitch books", "Due diligence", "Bloomberg Terminal", "PowerPoint / Excel mastery"] },
+      { name: "Work Experience", fields: ["Role", "Bank / Firm", "Dates", "Deals closed (name and deal size if public)", "Sectors covered", "Clients serviced"] },
+      { name: "Education", fields: ["Degree (top-tier university preferred)", "GPA", "Relevant coursework"] },
+      { name: "Certifications", fields: ["CFA", "Series 7 / 63 (US)", "CISI (UK)", "SCA license (UAE)"] },
+      { name: "Notable Transactions", fields: ["Deal name / type", "Value", "Your role"] },
+    ],
+    uaeNote: "DIFC and ADGM financial centre experience is a major differentiator in UAE IB hiring."
+  },
+  {
+    id: 9, cat: "Marketing", color: "coral",
+    title: "Digital Marketing Manager",
+    tagline: "SEO, paid media, social and growth marketers",
+    contact: ["Full Name", "Phone", "Email", "LinkedIn", "Portfolio / Blog URL", "City"],
+    summary: ["Marketing channels mastered", "Industries worked in", "Biggest growth achievement (e.g. grew organic traffic 3x)"],
+    sections: [
+      { name: "Core Skills", fields: ["SEO / SEM", "Google Ads / Meta Ads", "Email marketing (Mailchimp, Klaviyo)", "Analytics (GA4, Mixpanel)", "CRM (HubSpot, Salesforce)", "Content strategy", "A/B Testing"] },
+      { name: "Work Experience", fields: ["Role", "Company", "Dates", "Campaigns run", "ROAS / CPA achieved", "Audience size grown", "Revenue attributed to marketing"] },
+      { name: "Education", fields: ["Degree", "University"] },
+      { name: "Certifications", fields: ["Google Ads Certified", "Meta Blueprint", "HubSpot Inbound", "Google Analytics"] },
+      { name: "Key Campaigns", fields: ["Campaign name", "Channel", "Budget", "Result"] },
+    ],
+    uaeNote: "Arabic content capability is a big plus. Ramadan campaign experience is highly valued in UAE."
+  },
+  {
+    id: 10, cat: "Marketing", color: "coral",
+    title: "Brand Manager",
+    tagline: "Brand strategy and identity professionals in FMCG or corporate",
+    contact: ["Full Name", "Phone", "Email", "LinkedIn", "City"],
+    summary: ["Brand category expertise", "Geography managed", "P&L ownership experience"],
+    sections: [
+      { name: "Core Skills", fields: ["Brand strategy", "Consumer insights", "Campaign management", "Agency management", "Retail / trade marketing", "Budget management", "Market research"] },
+      { name: "Work Experience", fields: ["Role", "Company / Brand", "Dates", "Market share grown", "Campaigns launched", "Budget managed", "Revenue impact"] },
+      { name: "Education", fields: ["MBA preferred", "Bachelor's degree", "University"] },
+      { name: "Brands Managed", fields: ["Brand name", "Category", "Geography", "Revenue size"] },
+    ],
+    uaeNote: "UAE FMCG market values GCC regional brand management experience. Mention Arabic consumer insight knowledge."
+  },
+  {
+    id: 11, cat: "Healthcare", color: "green",
+    title: "Medical Doctor (Physician)",
+    tagline: "General practitioners and specialist medical doctors",
+    contact: ["Full Name", "Phone", "Email", "DHA / DOH / HAAD License Number", "Specialty", "City"],
+    summary: ["Medical specialty", "Years of clinical experience", "Subspecialty focus", "Patient volume handled"],
+    sections: [
+      { name: "Medical Qualifications", fields: ["MBBS / MD degree", "University", "Graduation year", "Board certification", "Fellowship (if any)"] },
+      { name: "Licenses & Registrations", fields: ["DHA License (Dubai)", "DOH License (Abu Dhabi)", "MOH License", "Country of primary license", "BLS / ACLS certification"] },
+      { name: "Clinical Experience", fields: ["Role / Specialty", "Hospital / Clinic", "Country", "Dates", "Patient volume", "Procedures performed", "Conditions managed"] },
+      { name: "Education & Training", fields: ["Medical degree", "Residency", "Fellowship", "CME credits"] },
+      { name: "Research & Publications", fields: ["Paper title", "Journal", "Year (if applicable)"] },
+    ],
+    uaeNote: "UAE requires DHA/DOH/MOH licensing before starting work. Include DataFlow verification status."
+  },
+  {
+    id: 12, cat: "Healthcare", color: "green",
+    title: "Registered Nurse",
+    tagline: "Clinical nurses across hospital, ICU, ER and community settings",
+    contact: ["Full Name", "Phone", "Email", "Nursing License Number", "Specialty", "City", "Visa Status"],
+    summary: ["Clinical specialty", "Years of experience", "Unit type (ICU, ER, OR, General Ward)", "Patient demographics"],
+    sections: [
+      { name: "Licenses & Certifications", fields: ["RN License", "Country of registration", "DHA / DOH / MOH License", "BLS / ACLS / PALS", "Specialty certs (CCRN, CEN)"] },
+      { name: "Clinical Experience", fields: ["Role", "Hospital", "Country", "Dates", "Unit type", "Bed capacity", "Patient ratio", "Key procedures / skills"] },
+      { name: "Education", fields: ["BSN / Diploma / MSN", "University / College", "Graduation year"] },
+      { name: "Clinical Skills", fields: ["IV therapy", "Wound care", "Ventilator management", "Medication administration", "Triage", "EMR systems (Epic, Cerner)"] },
+    ],
+    uaeNote: "DHA exam is mandatory for Dubai. Include NCLEX / IELTS / OET scores as these are required."
+  },
+  {
+    id: 13, cat: "Healthcare", color: "green",
+    title: "Pharmacist",
+    tagline: "Clinical, retail and hospital pharmacists",
+    contact: ["Full Name", "Phone", "Email", "Pharmacy License Number", "City", "Visa Status"],
+    summary: ["Pharmacy setting (hospital, retail, clinical)", "Years of experience", "Specialization"],
+    sections: [
+      { name: "Licenses", fields: ["Pharmacy degree", "Registration number", "Country", "DHA / DOH / MOH license", "Good Standing Certificate"] },
+      { name: "Work Experience", fields: ["Role", "Hospital / Pharmacy", "Country", "Dates", "Daily prescription volume", "Clinical interventions made", "Team managed"] },
+      { name: "Education", fields: ["B.Pharm / Pharm.D", "University", "Graduation year"] },
+      { name: "Skills", fields: ["Drug interaction checking", "Clinical review", "Compounding", "Pharmaceutical software (QS/1, RxWorks)", "Counselling"] },
+      { name: "Certifications", fields: ["BCPS", "CPE", "MOH competency certificate"] },
+    ],
+    uaeNote: "UAE requires a MOH / DHA license and DataFlow verification. IELTS band 6 minimum is typically required."
+  },
+  {
+    id: 14, cat: "Engineering", color: "purple",
+    title: "Civil / Structural Engineer",
+    tagline: "Construction, infrastructure and structural design engineers",
+    contact: ["Full Name", "Phone", "Email", "LinkedIn", "City", "Visa Status", "Professional Engineer (PE) Number if applicable"],
+    summary: ["Engineering specialty (structural, roads, water)", "Years of experience", "Project value handled"],
+    sections: [
+      { name: "Core Skills", fields: ["AutoCAD / Civil 3D", "STAAD.Pro / ETABS / SAP2000", "Revit / BIM", "Project management", "Site supervision", "BS / ACI / Eurocode"] },
+      { name: "Work Experience", fields: ["Role", "Company", "Country", "Dates", "Projects worked on", "Project value (AED/USD)", "Your scope", "Challenges overcome"] },
+      { name: "Education", fields: ["B.Eng / M.Eng Civil Engineering", "University", "Year"] },
+      { name: "Certifications / Memberships", fields: ["PEng / CEng", "ASCE / ICE member", "Chartered Engineer status", "OSHA / Safety cert"] },
+      { name: "Key Projects", fields: ["Project name", "Location", "Value", "Your role", "Completion status"] },
+    ],
+    uaeNote: "MMUP / UPDA license is required to work as an engineer in Qatar; UAE has DED/MOEI requirements. List large UAE/GCC projects prominently."
+  },
+  {
+    id: 15, cat: "Engineering", color: "purple",
+    title: "Electrical Engineer",
+    tagline: "Power systems, ELV, automation and electrical design engineers",
+    contact: ["Full Name", "Phone", "Email", "LinkedIn", "City", "Visa Status"],
+    summary: ["Electrical specialty (power, ELV, automation)", "Years of experience", "Key standards knowledge"],
+    sections: [
+      { name: "Core Skills", fields: ["AutoCAD Electrical", "ETAP / EPLAN", "PLC / SCADA", "DEWA / ADDC standards", "MV/LV systems", "Cable sizing / load flow"] },
+      { name: "Work Experience", fields: ["Role", "Company", "Country", "Dates", "Systems designed", "Project value", "Site supervision scope"] },
+      { name: "Education", fields: ["B.Eng Electrical / Electronics", "University", "Year"] },
+      { name: "Certifications", fields: ["Professional Engineer license", "IET membership", "OSHA 30-hour", "DEWA approval (Dubai)"] },
+      { name: "Key Projects", fields: ["Project name", "System type", "Capacity", "Your contribution"] },
+    ],
+    uaeNote: "DEWA/ADDC/SEWA-approved engineer status is essential for design sign-off roles in UAE."
+  },
+  {
+    id: 16, cat: "Engineering", color: "purple",
+    title: "Mechanical Engineer",
+    tagline: "HVAC, MEP, manufacturing and product design engineers",
+    contact: ["Full Name", "Phone", "Email", "LinkedIn", "City", "Visa Status"],
+    summary: ["Mechanical specialty (HVAC, MEP, manufacturing)", "Years of experience", "Key certifications"],
+    sections: [
+      { name: "Core Skills", fields: ["AutoCAD / SolidWorks / CATIA", "HVAC design (HAP, Trace700)", "ASHRAE standards", "Piping & plumbing", "BIM/Revit MEP", "FEA / CFD software"] },
+      { name: "Work Experience", fields: ["Role", "Company", "Country", "Dates", "Systems designed", "Project types (commercial, industrial)", "Commissioning experience"] },
+      { name: "Education", fields: ["B.Eng Mechanical", "University", "Year"] },
+      { name: "Certifications", fields: ["PEng / CEng", "ASHRAE member", "LEED / Estidama accreditation", "OSHA"] },
+      { name: "Key Projects", fields: ["Project", "Location", "System type", "Capacity", "Value"] },
+    ],
+    uaeNote: "Estidama (Abu Dhabi green building) and LEED knowledge are valued. Mention Expo 2020 or large UAE project experience."
+  },
+  {
+    id: 17, cat: "Legal", color: "amber",
+    title: "Lawyer / Legal Counsel",
+    tagline: "In-house counsel and private practice lawyers",
+    contact: ["Full Name", "Phone", "Email", "LinkedIn", "Bar Admission Details", "City"],
+    summary: ["Practice area (corporate, litigation, real estate)", "Jurisdictions admitted", "Years of experience", "Languages spoken"],
+    sections: [
+      { name: "Core Skills", fields: ["Contract drafting & review", "Corporate transactions", "Litigation / Arbitration", "Regulatory compliance", "Due diligence", "Legal research"] },
+      { name: "Work Experience", fields: ["Role", "Firm / Company", "Country", "Dates", "Cases / deals handled", "Practice area", "Transaction values (if public)", "Clients served"] },
+      { name: "Education", fields: ["LLB / JD / LLM", "University", "Year", "GPA if strong"] },
+      { name: "Bar Admissions", fields: ["Country / Jurisdiction", "Year admitted", "UAE MOHRE / DIFC Courts admission (if any)"] },
+      { name: "Languages", fields: ["English", "Arabic", "Other languages"] },
+    ],
+    uaeNote: "DIFC Courts and ADGM admission is a major differentiator. Arabic language proficiency and UAE Civil Law knowledge are highly valued."
+  },
+  {
+    id: 18, cat: "Legal", color: "amber",
+    title: "Compliance Officer",
+    tagline: "AML, regulatory and corporate compliance professionals",
+    contact: ["Full Name", "Phone", "Email", "LinkedIn", "City", "Visa Status"],
+    summary: ["Compliance domain (AML, regulatory, corporate)", "Industries covered", "Regulatory bodies familiar with"],
+    sections: [
+      { name: "Core Skills", fields: ["AML / KYC / CFT", "Regulatory reporting", "Policy writing", "Risk assessment", "Internal audit", "FATF / DFSA / CBUAE regulations"] },
+      { name: "Work Experience", fields: ["Role", "Company", "Industry", "Dates", "Compliance programs built", "Regulatory exams handled", "SAR/STR filings managed"] },
+      { name: "Education", fields: ["Degree (Law, Finance, Business)", "University"] },
+      { name: "Certifications", fields: ["CAMS (ACAMS)", "CFE", "ICA Certificate", "CISI Compliance Diploma"] },
+    ],
+    uaeNote: "UAE Central Bank (CBUAE) and DFSA frameworks are must-know. FATF gray list awareness is critical for 2024–25 compliance roles in UAE."
+  },
+  {
+    id: 19, cat: "Education", color: "teal",
+    title: "School Teacher",
+    tagline: "Primary, secondary and high school teachers",
+    contact: ["Full Name", "Phone", "Email", "LinkedIn", "Teaching License Number", "Subject specialty", "City"],
+    summary: ["Subject and grade level", "Curriculum experience (British, American, IB, MoE)", "Years of teaching"],
+    sections: [
+      { name: "Teaching Skills", fields: ["Curriculum delivery", "Lesson planning", "Classroom management", "Differentiated instruction", "Assessment & reporting", "EdTech tools (Google Classroom, Seesaw)"] },
+      { name: "Work Experience", fields: ["Role", "School", "Country", "Dates", "Grade levels taught", "Subject", "Class size", "KHDA / ADEK inspection results", "Extra-curricular led"] },
+      { name: "Education", fields: ["Bachelor's in Education / Subject", "PGCE / PGDE", "University"] },
+      { name: "Certifications", fields: ["Teaching license (country of origin)", "KHDA approval", "CELTA / DELTA (for ESL teachers)", "SEN / SENCO training"] },
+    ],
+    uaeNote: "KHDA (Dubai) and ADEK (Abu Dhabi) approval required. British curriculum teachers are in highest demand in UAE private schools."
+  },
+  {
+    id: 20, cat: "Education", color: "teal",
+    title: "University Lecturer / Professor",
+    tagline: "Higher education teaching and research faculty",
+    contact: ["Full Name", "Phone", "Email", "LinkedIn", "Google Scholar", "ResearchGate", "Institution", "City"],
+    summary: ["Academic specialty", "Research focus areas", "Teaching experience", "Publication record"],
+    sections: [
+      { name: "Academic Qualifications", fields: ["PhD / DBA / EdD", "University", "Thesis title", "Supervisor", "Year"] },
+      { name: "Teaching Experience", fields: ["Institution", "Rank (Lecturer / Asst Prof / Assoc Prof)", "Courses taught", "Dates", "Student evaluations", "Curriculum developed"] },
+      { name: "Research & Publications", fields: ["Journal papers (with citations)", "Conference papers", "Book chapters", "Books authored", "Research grants received"] },
+      { name: "Academic Service", fields: ["Editorial board memberships", "Peer review work", "Committee service", "PhD supervision"] },
+      { name: "Certifications", fields: ["HEA Fellowship (UK)", "CAA accreditation (UAE)", "Teaching qualification"] },
+    ],
+    uaeNote: "CAA (Commission for Academic Accreditation) approval needed for UAE university roles. Strong publication record is essential."
+  },
+  {
+    id: 21, cat: "Hospitality", color: "pink",
+    title: "Hotel Manager / F&B Manager",
+    tagline: "Hospitality operations and food & beverage management",
+    contact: ["Full Name", "Phone", "Email", "LinkedIn", "City", "Visa Status"],
+    summary: ["Hotel category managed (5-star, resort, boutique)", "F&B / rooms division experience", "Revenue managed"],
+    sections: [
+      { name: "Core Skills", fields: ["Revenue management", "P&L ownership", "Front office operations", "F&B operations", "PMS systems (Opera, Micros)", "Staff training", "Guest satisfaction (TripAdvisor / NPS)"] },
+      { name: "Work Experience", fields: ["Role", "Hotel / Brand", "City", "Dates", "Property size (rooms)", "Revenue managed", "Team size", "RevPAR / GOP targets achieved"] },
+      { name: "Education", fields: ["Hospitality Management degree", "Hotel school", "Year"] },
+      { name: "Certifications", fields: ["WSET (sommelier)", "Halal food handling", "Food safety (Level 2/3)", "Revenue management cert"] },
+    ],
+    uaeNote: "Dubai Tourism (DTCM) permits required. Halal food handling experience is important. Arabic-speaking staff are prioritized in 5-star properties."
+  },
+  {
+    id: 22, cat: "Hospitality", color: "pink",
+    title: "Chef / Head Chef",
+    tagline: "Executive, sous and specialist chefs in hotels and restaurants",
+    contact: ["Full Name", "Phone", "Email", "LinkedIn", "City", "Visa Status"],
+    summary: ["Cuisine specialty", "Type of kitchen (hotel, fine dining, casual)", "Team size managed"],
+    sections: [
+      { name: "Core Skills", fields: ["Cuisine specializations", "Menu development", "Food cost management", "HACCP / food safety", "Kitchen brigade management", "Supplier relations"] },
+      { name: "Work Experience", fields: ["Role", "Restaurant / Hotel", "City", "Dates", "Covers per day", "Kitchen team size", "Food cost % achieved", "Michelin / awards (if any)"] },
+      { name: "Education", fields: ["Culinary school / degree", "Institution", "Year"] },
+      { name: "Certifications", fields: ["Food Safety Level 3 / 4", "HACCP", "Halal certification", "DTCM Food Handler cert"] },
+    ],
+    uaeNote: "Dubai Municipality food safety certificate is mandatory. Halal-certified cooking knowledge is essential for UAE."
+  },
+  {
+    id: 23, cat: "Sales", color: "coral",
+    title: "Sales Manager / Business Development",
+    tagline: "B2B and B2C sales professionals across industries",
+    contact: ["Full Name", "Phone", "Email", "LinkedIn", "City", "Visa Status", "Driving License (important in UAE)"],
+    summary: ["Sales specialty (B2B, SaaS, real estate, FMCG)", "Industry focus", "Revenue generated", "Team managed"],
+    sections: [
+      { name: "Core Skills", fields: ["Pipeline management", "CRM (Salesforce, HubSpot)", "Negotiation", "Territory management", "Key account management", "Forecasting"] },
+      { name: "Work Experience", fields: ["Role", "Company", "Industry", "Dates", "Revenue quota", "% of target achieved", "Deals closed (size)", "Clients acquired", "Team size managed"] },
+      { name: "Education", fields: ["Degree", "University"] },
+      { name: "Key Achievements", fields: ["Biggest deal closed", "Revenue record set", "Market share captured", "Awards / President's Club"] },
+    ],
+    uaeNote: "UAE driving license is almost always required. Arabic-speaking candidates get preference. Mention GCC network and existing client relationships."
+  },
+  {
+    id: 24, cat: "Sales", color: "coral",
+    title: "Real Estate Agent / Property Consultant",
+    tagline: "Residential and commercial property sales professionals",
+    contact: ["Full Name", "Phone (WhatsApp)", "Email", "LinkedIn", "RERA / DLD License Number", "Agency", "City"],
+    summary: ["Property type specialty (residential, commercial, off-plan)", "Areas covered", "Transaction volume"],
+    sections: [
+      { name: "Core Skills", fields: ["Sales & negotiation", "Market analysis", "CRM tools (Salesforce, Zoho)", "Property portals (Bayut, Property Finder)", "Contract knowledge", "Client relationship management"] },
+      { name: "Work Experience", fields: ["Role", "Agency", "Dates", "Properties sold (volume + value)", "Area specialization", "Off-plan vs secondary market", "Rental vs sales split"] },
+      { name: "Licenses", fields: ["RERA Certification (Dubai)", "DLD registration", "Abu Dhabi / Sharjah equivalents"] },
+      { name: "Key Sales", fields: ["Development name", "Units sold", "Transaction value", "Record sales (if any)"] },
+    ],
+    uaeNote: "RERA certification is mandatory for Dubai real estate. WhatsApp contact number is standard. Include language skills — multilingual agents are preferred."
+  },
+  {
+    id: 25, cat: "HR", color: "purple",
+    title: "HR Manager / HR Business Partner",
+    tagline: "Human resources generalists and strategic HR professionals",
+    contact: ["Full Name", "Phone", "Email", "LinkedIn", "City", "Visa Status"],
+    summary: ["HR specialization (HRBP, talent, L&D, compensation)", "Industries worked in", "Headcount managed"],
+    sections: [
+      { name: "Core Skills", fields: ["Talent acquisition", "Employee relations", "Performance management", "Compensation & benefits", "HR systems (SAP, Workday, Oracle)", "UAE Labour Law", "Emiratisation / Nationalization programs"] },
+      { name: "Work Experience", fields: ["Role", "Company", "Industry", "Dates", "Headcount supported", "Hiring volume", "Attrition rate reduced", "Policies developed", "HRIS implemented"] },
+      { name: "Education", fields: ["Degree (HR, Business, Psychology)", "University"] },
+      { name: "Certifications", fields: ["CIPD Level 5/7", "SHRM-CP / SHRM-SCP", "HRCI PHR / SPHR", "UAE Labour Law certification"] },
+    ],
+    uaeNote: "Knowledge of UAE Labour Law (Federal Decree-Law No. 33 of 2021) is mandatory. Emiratisation (Nafis) program experience is highly valued."
+  },
+  {
+    id: 26, cat: "Logistics", color: "blue",
+    title: "Supply Chain / Logistics Manager",
+    tagline: "End-to-end supply chain, procurement and logistics professionals",
+    contact: ["Full Name", "Phone", "Email", "LinkedIn", "City", "Visa Status"],
+    summary: ["Supply chain specialty (procurement, warehousing, distribution)", "Industry focus", "Spend / inventory managed"],
+    sections: [
+      { name: "Core Skills", fields: ["Procurement & sourcing", "Warehouse management", "Inventory control", "ERP systems (SAP, Oracle)", "Freight forwarding", "Customs clearance (UAE)", "Lean / Six Sigma"] },
+      { name: "Work Experience", fields: ["Role", "Company", "Industry", "Dates", "Annual spend managed", "Cost savings achieved", "Supplier base managed", "On-time delivery rates", "Warehouse capacity"] },
+      { name: "Education", fields: ["Degree (Logistics, Supply Chain, Engineering)", "University"] },
+      { name: "Certifications", fields: ["CIPS", "CSCP (APICS)", "Six Sigma Green/Black Belt", "IATA Dangerous Goods"] },
+    ],
+    uaeNote: "Jebel Ali Free Zone (JAFZA) and UAE Customs knowledge is a strong differentiator. Arabic language helpful for supplier relations."
+  },
+  {
+    id: 27, cat: "Creative", color: "pink",
+    title: "Graphic Designer / Art Director",
+    tagline: "Visual communication, branding and creative direction professionals",
+    contact: ["Full Name", "Email", "Phone", "Portfolio URL (mandatory)", "LinkedIn", "Behance / Dribbble", "City"],
+    summary: ["Design specialty (branding, print, digital, packaging)", "Industries worked in", "Style / aesthetic"],
+    sections: [
+      { name: "Core Skills", fields: ["Adobe Illustrator", "Adobe Photoshop", "InDesign", "Figma", "Motion graphics (After Effects)", "Brand identity", "Typography", "Arabic design / RTL layout"] },
+      { name: "Work Experience", fields: ["Role", "Agency / Company", "Dates", "Brands worked on", "Campaign scope", "Team size", "Print vs digital split"] },
+      { name: "Portfolio Highlights", fields: ["Project name", "Brief", "Output", "Brand", "Link"] },
+      { name: "Education", fields: ["Degree / Diploma (Graphic Design, Fine Arts)", "Institution"] },
+    ],
+    uaeNote: "Arabic typography and RTL design skills are extremely valuable in UAE. Include Arabic portfolio samples if available."
+  },
+  {
+    id: 28, cat: "Creative", color: "pink",
+    title: "Content Creator / Social Media Manager",
+    tagline: "Digital content, influencer and community management professionals",
+    contact: ["Full Name", "Email", "Phone", "LinkedIn", "Instagram / TikTok / YouTube handle", "Portfolio / Media Kit URL", "City"],
+    summary: ["Content niche or specialty", "Platforms mastered", "Audience size / engagement stats"],
+    sections: [
+      { name: "Core Skills", fields: ["Content strategy", "Video editing (Premiere Pro, CapCut)", "Copywriting", "Photography", "Community management", "Analytics (Meta Insights, TikTok Analytics)", "Influencer outreach"] },
+      { name: "Work Experience", fields: ["Role", "Brand / Agency", "Dates", "Platforms managed", "Follower growth achieved", "Engagement rate", "Content pieces produced per month", "Campaign results (reach, conversions)"] },
+      { name: "Platforms & Metrics", fields: ["Instagram followers", "TikTok followers", "YouTube subscribers", "Avg engagement rate", "Total impressions (monthly)"] },
+      { name: "Education", fields: ["Degree (Marketing, Media, Communications)", "University"] },
+    ],
+    uaeNote: "UAE National Media Council (NMC) influencer license is required for paid partnerships in UAE. Arabic content capability is a major advantage."
+  },
+  {
+    id: 29, cat: "Admin", color: "gray",
+    title: "Executive Assistant / PA",
+    tagline: "C-suite support, office management and administrative professionals",
+    contact: ["Full Name", "Phone", "Email", "LinkedIn", "City", "Visa Status", "Driving License"],
+    summary: ["Level of executive supported (CEO, CFO, C-suite)", "Industries worked in", "Languages spoken"],
+    sections: [
+      { name: "Core Skills", fields: ["Diary & calendar management", "Travel coordination", "Board meeting preparation", "Minute-taking", "Correspondence management", "MS Office / Google Workspace", "Confidentiality / discretion", "Event coordination"] },
+      { name: "Work Experience", fields: ["Role", "Company", "Industry", "Dates", "Executive level supported", "Team size coordinated", "Budget managed (if any)", "Countries coordinated across"] },
+      { name: "Education", fields: ["Degree / Diploma", "Institution"] },
+      { name: "Certifications", fields: ["PACE / CAP certification", "MS Office specialist", "Project Management (PMP / Prince2)"] },
+      { name: "Languages", fields: ["English (mandatory)", "Arabic (strong advantage)", "Other languages"] },
+    ],
+    uaeNote: "Arabic language is strongly preferred for EA roles supporting Emirati executives. Discretion and cultural sensitivity are essential."
+  },
+  {
+    id: 30, cat: "Construction", color: "amber",
+    title: "Project Manager (Construction)",
+    tagline: "Building, infrastructure and fit-out project managers",
+    contact: ["Full Name", "Phone", "Email", "LinkedIn", "City", "Visa Status", "PMP / PRINCE2 number"],
+    summary: ["Project type (high-rise, infrastructure, fit-out)", "Project values delivered", "Countries worked in"],
+    sections: [
+      { name: "Core Skills", fields: ["Primavera P6 / MS Project", "Contract management (FIDIC)", "Risk management", "Cost control / EVM", "Stakeholder management", "BIM coordination", "HSE management"] },
+      { name: "Work Experience", fields: ["Role", "Company / Developer", "Country", "Dates", "Project name", "Project value (AED/USD)", "Your scope", "Contract type", "Team size managed", "Milestones achieved"] },
+      { name: "Education", fields: ["B.Eng / B.Sc (Civil, Construction, Architecture)", "University", "Year"] },
+      { name: "Certifications", fields: ["PMP (PMI)", "PRINCE2", "MRICS", "CIOB member", "OSHA 30-hour", "Golden Fork / Balfour Beatty safety cert"] },
+      { name: "Key Projects", fields: ["Project name", "Developer / Client", "Value", "Your role", "Completion date / status"] },
+    ],
+    uaeNote: "UAE construction market is booming (2024–2026). FIDIC contract knowledge is essential. HSE and Expo/Vision 2030 project experience is valued."
+  },
+];
+
+const cats = ["All", ...new Set(templates.map(t => t.cat))];
+const catColors = { Tech:"blue", Finance:"teal", Marketing:"coral", Healthcare:"green", Engineering:"purple", Legal:"amber", Education:"teal", Hospitality:"pink", Sales:"coral", HR:"purple", Logistics:"blue", Creative:"pink", Admin:"gray", Construction:"amber" };
+
+function bgColor(c) {
+  const map = { blue:"var(--color-background-info)", teal:"#E1F5EE", coral:"#FAECE7", green:"var(--color-background-success)", purple:"#EEEDFE", amber:"var(--color-background-warning)", pink:"#FBEAF0", gray:"var(--color-background-secondary)" };
+  return map[c] || "var(--color-background-secondary)";
+}
+function txtColor(c) {
+  const map = { blue:"var(--color-text-info)", teal:"#0F6E56", coral:"#993C1D", green:"var(--color-text-success)", purple:"#534AB7", amber:"var(--color-text-warning)", pink:"#993556", gray:"var(--color-text-secondary)" };
+  return map[c] || "var(--color-text-secondary)";
+}
+
+let active = "All";
+let expanded = null;
+
+function renderFilters() {
+  const bar = document.getElementById("filters");
+  bar.innerHTML = cats.map(c =>
+    `<button class="filter-btn${c===active?" active":""}" onclick="setFilter('${c}')">${c}</button>`
+  ).join("");
+}
+
+function renderGrid() {
+  const grid = document.getElementById("grid");
+  const shown = active === "All" ? templates : templates.filter(t => t.cat === active);
+  grid.innerHTML = shown.map(t => {
+    const isExp = expanded === t.id;
+    const col = catColors[t.cat] || "gray";
+    return `<div class="card${isExp?" expanded":""}" onclick="toggleCard(${t.id})">
+      <div class="card-top">
+        <span class="card-num">${String(t.id).padStart(2,"0")}</span>
+        <span class="card-title">${t.title}</span>
+        <span class="card-cat" style="background:${bgColor(col)};color:${txtColor(col)}">${t.cat}</span>
+        <span class="card-chevron">${isExp?"▲":"▼"}</span>
+      </div>
+      <div class="card-tagline">${t.tagline}</div>
+      <div class="card-detail">
+        <div class="section-label">Contact fields</div>
+        <div class="fields">${t.contact.map(f=>`<span class="field key">${f}</span>`).join("")}</div>
+        <div class="section-label">Summary should include</div>
+        <div class="fields">${t.summary.map(f=>`<span class="field">${f}</span>`).join("")}</div>
+        ${t.sections.map(s=>`
+          <div class="section-label">${s.name}</div>
+          <div class="fields">${s.fields.map(f=>`<span class="field">${f}</span>`).join("")}</div>
+        `).join("")}
+        <div class="note">${t.uaeNote}</div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function setFilter(cat) {
+  active = cat;
+  expanded = null;
+  renderFilters();
+  renderGrid();
+}
+
+function toggleCard(id) {
+  expanded = expanded === id ? null : id;
+  renderGrid();
+}
+
+renderFilters();
+renderGrid();
+</script>

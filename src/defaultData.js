@@ -1,0 +1,90 @@
+export const DEFAULT = {
+  name: 'Muhammad Yasir',
+  title: 'AI & Machine Learning Engineer',
+  summary: 'AI and automation engineer with hands-on experience building production-ready machine learning systems, computer vision pipelines, and NLP applications. Strong background in Python development, deep learning model deployment, and end-to-end data automation. Built autonomous AI agents, document extraction systems, and predictive analytics tools. Currently in Dubai — available to start immediately.',
+  phone: '+971 55 751 5330',
+  email: 'jamyasir0534@gmail.com',
+  location: 'Al Murar, Dubai, UAE',
+  linkedin: 'https://linkedin.com/in/devxyasir',
+  github: 'https://github.com/devxyasir',
+  nationality: 'Pakistani',
+  visa: 'UAE Residence Visa',
+  visaexp: '2028',
+  avail: 'Immediate',
+  skills: [
+    { name: 'Python', pct: 95 },
+    { name: 'Machine Learning', pct: 85 },
+    { name: 'PyTorch / TensorFlow', pct: 80 },
+    { name: 'LangChain / GenAI', pct: 78 },
+    { name: 'OpenCV', pct: 82 },
+    { name: 'Pandas / NumPy', pct: 88 },
+    { name: 'REST APIs', pct: 80 },
+    { name: 'SQL', pct: 74 },
+  ],
+  langs: [
+    { name: 'Urdu', level: 'Native', pct: 100 },
+    { name: 'English', level: 'Advanced', pct: 85 },
+  ],
+  tagsLang: ['Python', 'SQL', 'JavaScript', 'Java', 'React'],
+  tagsAI: ['PyTorch', 'TensorFlow', 'scikit-learn', 'LangChain', 'OpenCV', 'Hugging Face'],
+  tagsData: ['Pandas', 'NumPy', 'Web Scraping', 'API Integration', 'Email Automation'],
+  tagsTools: ['Git', 'Jupyter', 'VS Code', 'Postman'],
+  experience: [
+    {
+      id: 1,
+      role: 'AI Engineer Intern',
+      company: 'Codiux',
+      location: 'Multan, Pakistan',
+      dates: 'Jun 2025 – Nov 2025',
+      bullets: [
+        'Designed and deployed deep learning and OCR models for computer vision and document processing using PyTorch and TensorFlow.',
+        'Built NLP-based text classification systems and predictive analytics models — handled data preprocessing, feature engineering, and optimization end to end.',
+        'Developed autonomous AI agents and automation workflows integrating REST APIs, model inference pipelines, and real-time data handling.',
+        'Implemented TrOCR-based document extraction system that automated structured data retrieval from scanned files.',
+      ],
+    },
+    {
+      id: 2,
+      role: 'Python Developer Intern',
+      company: 'Bahauddin Zakariya University – Sub Campus',
+      location: 'Lodhran, Pakistan',
+      dates: 'Aug 2024 – Nov 2024',
+      bullets: [
+        'Built Python data pipelines and web scrapers to automate research data collection and cleaning — reduced manual processing by approximately 50%.',
+        'Conducted data analysis and exploratory ML using pandas, NumPy, and scikit-learn.',
+        'Delivered reproducible workflows using Git, Jupyter Notebooks, and unit testing alongside university researchers.',
+      ],
+    },
+  ],
+  education: [
+    {
+      id: 1,
+      degree: 'Bachelor of Science – Information Technology',
+      institution: 'Bahauddin Zakariya University, Sub Campus Lodhran',
+      sub: 'CGPA: 3.14 / 4.00',
+      dates: 'Mar 2021 – May 2025',
+      thesis: 'Final Year Research: A Decentralized Data Vault Using Blockchain Technology',
+    },
+  ],
+  certs: [
+    { id: 1, name: 'Generative AI using LangChain', issuer: 'CampusX', date: 'Nov – Dec 2025' },
+    { id: 2, name: '100 Days of Machine Learning', issuer: 'CampusX', date: 'Aug – Oct 2024' },
+    { id: 3, name: 'Cyber Security for Everyone', issuer: 'Coursera', date: 'Jun – Jul 2024' },
+  ],
+  projects: [
+    { id: 1, name: 'Autonomous AI Coding Agent', year: '2025', desc: 'Built an AI agent that automates coding tasks — writes, debugs, and self-corrects code using LLM reasoning loops with tool use and context tracking.', stack: 'Python · LangChain · OpenAI API · Agents' },
+    { id: 2, name: 'TrOCR Document Extraction System', year: '2024–25', desc: 'Automated structured data extraction from scanned documents using Microsoft TrOCR. Handles layout parsing, field recognition, and export to structured formats.', stack: 'TrOCR · PyTorch · Computer Vision · NLP' },
+    { id: 3, name: 'Stocks Trading Analysis Agent', year: '2025', desc: 'GenAI system for real-time stock trend analysis and prediction. Integrates live market APIs, LLM reasoning, and time-series analysis in a single workflow.', stack: 'LangChain · GenAI · Live APIs · Pandas' },
+    { id: 4, name: 'Email Spam Classifier (Neural Network)', year: '2025', desc: 'PyTorch neural network for email spam detection. Covered text preprocessing, tokenization, model training, and evaluation with strong precision and recall.', stack: 'PyTorch · NLP · scikit-learn · Classification' },
+    { id: 5, name: 'Blockchain-Backed Secure Storage', year: '2025', desc: 'Decentralized data vault using blockchain for tamper-proof storage and cryptographic data integrity verification. Basis of final year research project.', stack: 'Blockchain · Python · Cryptography' },
+    { id: 6, name: 'Number Plate Detection – Florence', year: '2022–23', desc: 'Vehicle number plate detection and recognition using Microsoft Florence vision model. Processes live camera feeds with real-time inference and OCR.', stack: 'Florence · OpenCV · Computer Vision' },
+    { id: 7, name: 'Fantasy E-Sports Prediction Engine', year: '2024', desc: 'ML models predicting player and match outcomes in fantasy e-sports. Applied feature engineering on historical match data with ensemble model scoring pipeline.', stack: 'scikit-learn · Pandas · Feature Engineering' },
+    { id: 8, name: 'Email Automation & Smart Reply', year: '2023–24', desc: 'Automated email processing system with intelligent reply generation. Classifies incoming emails using NLP and triggers contextual automated responses.', stack: 'Python · NLP · SMTP · Automation · APIs' },
+  ],
+  interests: ['Artificial Intelligence & ML', 'Deep Learning & Neural Networks', 'Computer Vision', 'Natural Language Processing', 'Predictive Analytics', 'Generative AI', 'Blockchain & Secure Systems'],
+  achievements: ['Guest Speaker – AI/ML, Bahauddin Zakariya University Sub-Campus Lodhran. Delivered a session on practical machine learning applications to undergraduate students.'],
+};
+
+const KEY = 'cv_yasir_v1';
+export const load = () => { try { const s = localStorage.getItem(KEY); return s ? { ...DEFAULT, ...JSON.parse(s) } : { ...DEFAULT }; } catch { return { ...DEFAULT }; } };
+export const save = (d) => { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch {} };
