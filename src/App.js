@@ -1,8 +1,32 @@
-import React, { useState, useCallback } from 'react';
-import { pdf, PDFViewer } from '@react-pdf/renderer';
+import React, { useState, useCallback, useEffect } from 'react';
+import { pdf, PDFViewer, usePDF } from '@react-pdf/renderer';
+import { Document, Page, pdfjs } from 'react-pdf';
 import EditorPanel from './EditorPanel';
 import { load, save } from './defaultData';
 import TemplateGallery from './components/TemplateGallery';
+
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+
+function MobilePDFPreview({ document }) {
+  const [instance] = usePDF({ document });
+  const [numPages, setNumPages] = useState(null);
+
+  if (instance.loading) return <div style={{ padding: 20, color: '#333' }}>Generating Mobile Preview...</div>;
+  if (instance.error) return <div style={{ padding: 20, color: 'red' }}>Error generating preview: {instance.error}</div>;
+  if (!instance.url) return null;
+
+  return (
+    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <Document file={instance.url} onLoadSuccess={({ numPages }) => setNumPages(numPages)}>
+        {Array.from(new Array(numPages), (el, index) => (
+           <div key={`page_${index + 1}`} style={{ marginBottom: 16, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+             <Page pageNumber={index + 1} width={window.innerWidth - 32} renderTextLayer={false} renderAnnotationLayer={false} />
+           </div>
+        ))}
+      </Document>
+    </div>
+  );
+}
 
 import ModernTech from './templates/ModernTech';
 import AtsClassic from './templates/AtsClassic';
@@ -238,11 +262,15 @@ export default function App() {
 
           <EditorPanel data={data} onChange={handleChange} isOpen={panelOpen} onClose={() => setPanel(false)} />
 
-          {/* Native PDF Live Viewer */}
-          <div style={{ width: '100%', maxWidth: 850, height: 1150, marginBottom: 40 }}>
-            <PDFViewer showToolbar={false} width="100%" height="100%" style={{ border: 'none', borderRadius: 8, boxShadow: '0 12px 40px rgba(0,0,0,.2)', backgroundColor: '#fff' }}>
-              {React.createElement(getTemplate(), { data, photoSrc: includePhoto ? photoSrc : null })}
-            </PDFViewer>
+          {/* Native PDF Live Viewer / Mobile Preview */}
+          <div style={{ width: '100%', maxWidth: 850, height: window.innerWidth > 768 ? 1150 : 'auto', marginBottom: 40 }}>
+            {window.innerWidth > 768 ? (
+              <PDFViewer showToolbar={false} width="100%" height="100%" style={{ border: 'none', borderRadius: 8, boxShadow: '0 12px 40px rgba(0,0,0,.2)', backgroundColor: '#fff' }}>
+                {React.createElement(getTemplate(), { data, photoSrc: includePhoto ? photoSrc : null })}
+              </PDFViewer>
+            ) : (
+              <MobilePDFPreview document={React.createElement(getTemplate(), { data, photoSrc: includePhoto ? photoSrc : null })} />
+            )}
           </div>
 
         </div>
