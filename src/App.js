@@ -43,6 +43,106 @@ import { ProfessionTemplates } from './templates/ProfessionTemplates';
 const N = '#1c2b3a';
 const BL = '#1a5fa0';
 
+// ── Support Overlay ──────────────────────────────────────────────────
+const supportTexts = [
+  'Free Palestine 🇵🇸', 'Stand with Gaza ✌️', 'Justice for Palestine ⚖️',
+  'Pray for Gaza 🙏', 'Save Palestine 🌍', 'Gaza Strong 💪',
+  'Solidarity with Palestine 🤝', 'Let Gaza Live 🌅', 'Palestine Will Be Free 🕊️',
+  'End the Siege on Gaza 🔓', 'Honor Palestine 🇵🇸', 'End Zionism Now 🛑',
+  'Hope for Gaza 🕊️', 'We Stand with Palestine 🏛️', 'Gaza Needs Us ❤️',
+  'Palestine in our Hearts 🖤', 'Resist Zionist Occupation 🛡️', 'Food & Meds for Gaza 💧🍞',
+  'Peace for Palestine ☮️', 'Humanity for Gaza 🤲', 'Gaza Resilience 🌱',
+  'Support Palestinian Rights ⚖️', 'Rebuild Gaza 🏗️', 'Stand for Palestine ✊',
+  'Raise the Palestinian Flag 🇵🇸', 'Zionism is Racism 🚫', 'Prayers for Palestine 🤲',
+  'Children of Gaza 👧👦', 'Love for Palestine 💖', 'Doctors for Gaza 🩺',
+  'Safe Skies for Gaza 🌌', 'Aid for Palestine 📦', 'Journalists of Gaza 📹',
+  'Palestine Forever 🇵🇸', 'Remember Gaza 🥀', 'Peace to Palestine 🙏',
+  'Boycott Zionism 🛑', 'Palestine Bleeds 🩸', 'Justice for Gaza ⚖️',
+  'Empathy for Palestine 🤲', 'A Future for Gaza 🌟', 'Every Palestinian Life Matters 🌟',
+  'Stop Zionist Violence ✋', 'A Free Palestine 🗺️', 'Palestinian Solidarity 🤝',
+  'Gaza Resilience 💪', 'Light for Gaza 🕯️', 'Global Support for Palestine 🌍',
+  'Stand Against Zionist Oppression 🛡️', 'Freedom for Palestine 🇵🇸'
+];
+
+function PalestineSupportOverlay() {
+  const [clouds, setClouds] = useState([]);
+
+  useEffect(() => {
+    // Attractive colors to grab attention
+    const colors = [
+      '#e63946', // Vibrant Red
+      '#2a9d8f', // Teal
+      '#f4a261', // Sandy Orange
+      '#ffb703', // Yellow
+      '#4361ee', // Bright Blue
+      '#3a0ca3'  // Deep Purple
+    ];
+
+    const generateClouds = () => {
+      // Pick 3 random, unique texts for this cycle
+      const shuffledTexts = [...supportTexts].sort(() => 0.5 - Math.random());
+      
+      return Array.from({ length: 3 }).map((_, i) => ({
+        id: Math.random(), // Unique ID forces re-render/re-animation
+        text: shuffledTexts[i],
+        left: 5 + Math.random() * 85, // 5% to 90% horizontal spread across screen
+        duration: 10 + Math.random() * 8, // 10s to 18s falling speed
+        delay: Math.random() * 5, // Staggered start 0 to 5s
+        scale: 0.85 + Math.random() * 0.4,
+        bgColor: colors[Math.floor(Math.random() * colors.length)]
+      }));
+    };
+
+    setClouds(generateClouds());
+
+    // Periodically generate new clouds to simulate an endless, varied fall
+    const intervalId = setInterval(() => {
+      setClouds(generateClouds());
+    }, 20000); // Regenerate every 20 seconds as they fall out of view
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  return (
+    <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', pointerEvents: 'none', zIndex: 9998, overflow: 'hidden' }}>
+      <style>{`
+        @keyframes floatDown {
+          0% { transform: translateY(-10vh); opacity: 0; }
+          10% { opacity: 0.95; }
+          90% { opacity: 0.95; }
+          100% { transform: translateY(110vh); opacity: 0; }
+        }
+      `}</style>
+      {clouds.map(c => (
+        <div 
+          key={c.id} 
+          style={{
+            position: 'absolute',
+            left: `${c.left}%`,
+            top: '-50px',
+            animation: `floatDown ${c.duration}s linear ${c.delay}s infinite`,
+            transform: `scale(${c.scale})`,
+            background: c.bgColor,
+            padding: '12px 28px',
+            borderRadius: '24px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
+            border: '2px solid rgba(255,255,255,0.8)',
+            color: '#ffffff',
+            fontWeight: '700',
+            fontSize: '15px',
+            whiteSpace: 'nowrap',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px'
+          }}
+        >
+          {c.text}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ── Main App ──────────────────────────────────────────────────────
 
 export default function App() {
@@ -164,6 +264,8 @@ export default function App() {
 
   return (
     <>
+      <PalestineSupportOverlay />
+
       {/* Global Credit Overlay Popup */}
       {showCredit && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(3px)', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'fadeIn 0.3s ease' }}>
